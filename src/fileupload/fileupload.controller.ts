@@ -1,6 +1,6 @@
 import { Controller, ForbiddenException, Get, Param, Post, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiSecurity, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
 import { Response } from 'express'
 import { diskStorage } from 'multer'
 import { extname } from 'path'
@@ -16,8 +16,8 @@ export class FileuploadController {
 
   @Post('upload')
   @UseGuards(JwtGuard, RolesGuard)
-  @Roles(Role.Restricted, Role.Admin)
-  @ApiOperation({ summary: `ReqRole: ${[Role.Restricted, Role.Admin]}` })
+  @Roles(Role.User, Role.Admin)
+  @ApiOperation({ summary: `ReqRole: ${[Role.User, Role.Admin]}` })
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -59,8 +59,8 @@ export class FileuploadController {
 
   @Post('product')
   @UseGuards(JwtGuard, RolesGuard)
-  @Roles(Role.Restricted, Role.Admin)
-  @ApiOperation({ summary: `ReqRole: ${[Role.Restricted, Role.Admin]}` })
+  @Roles(Role.User, Role.Admin)
+  @ApiOperation({ summary: `ReqRole: ${[Role.User, Role.Admin]}` })
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -102,8 +102,8 @@ export class FileuploadController {
 
   @Post('restaurant')
   @UseGuards(JwtGuard, RolesGuard)
-  @Roles(Role.Restricted, Role.Admin)
-  @ApiOperation({ summary: `ReqRole: ${[Role.Restricted, Role.Admin]}` })
+  @Roles(Role.User, Role.Admin)
+  @ApiOperation({ summary: `ReqRole: ${[Role.User, Role.Admin]}` })
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -153,15 +153,6 @@ export class FileuploadController {
     return this.fileuploadService.getImage(res, filename)
   }
 
-  @Get('allergies/:filename')
-  @ApiParam({
-    name: 'filename',
-    description: 'Code of the allergy image (*on the server*)',
-    example: '1.png'
-  })
-  getStaticFile(@Res() res: Response, @Param('filename') filename) {
-    return this.fileuploadService.getStaticImage(res, filename)
-  }
 
   @Get('products/:filename')
   @ApiParam({
@@ -170,15 +161,6 @@ export class FileuploadController {
   })
   getProduct(@Res() res: Response, @Param('filename') filename) {
     return this.fileuploadService.getProduct(res, filename)
-  }
-
-  @Get('restaurants/:filename')
-  @ApiParam({
-    name: 'filename',
-    description: 'Name of the image of the restaurant (*on the server*)',
-  })
-  getRestaurant(@Res() res: Response, @Param('filename') filename) {
-    return this.fileuploadService.getRestaurant(res, filename)
   }
 
   @Get('placeholders/:filename')

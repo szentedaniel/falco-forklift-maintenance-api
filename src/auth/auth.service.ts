@@ -1,26 +1,21 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
-import { AuthSignInDto, AuthSignUpAdminDto, AuthSignUpDto, AuthUpdateSettingsDto, ForgotPasswordDto, ResetPasswordDto } from './dto'
+import { AuthSignInDto, AuthSignUpDto, AuthUpdateSettingsDto } from './dto'
 import * as argon from 'argon2'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime'
 import { MailerService } from '@nestjs-modules/mailer'
-import { refresh_tokens, user } from '@prisma/client'
-import { join } from 'path'
+import { refresh_tokens, users } from '@prisma/client'
 import { ConfigService } from '@nestjs/config'
-import * as objectHash from 'object-hash'
 import { JwtService } from '@nestjs/jwt'
-import { getAdminUser } from 'src/utils'
-import { Auth, google } from 'googleapis'
+import { Auth } from 'googleapis'
 import { convertedUserDto } from './dto/authRespose.dto'
+import { Role } from './enums'
 
 @Injectable()
 export class AuthService {
   private oauthClient: Auth.OAuth2Client
 
-  constructor(private prisma: PrismaService, private readonly mailerService: MailerService, private config: ConfigService, private jwt: JwtService) {
-    const clientId = this.config.get('GOOGLE_CLIENT_ID')
-    const clientSecret = this.config.get('GOOGLE_CLIENT_SECRET')
-    this.oauthClient = new google.auth.OAuth2(clientId, clientSecret)
+  constructor(private prisma: PrismaService, private config: ConfigService, private jwt: JwtService) {
   }
 
 
@@ -29,24 +24,21 @@ export class AuthService {
     const hash = await argon.hash(dto.password)
     // save user to db
     try {
-      const role = ['user']
+      const role = [Role.User]
 
       // console.log(role,)
-      const user = await this.prisma.user.create({
+      const user = await this.prisma.users.create({
         data: {
-          email: dto.email,
+          username: dto.username,
           name: dto.name,
           role: role,
           password: hash,
-          phone: dto.phone
         }
       })
 
-      const registeredUser = await this.sendVerificationEmail(user)
+      const convertedUser = this.convertUserData(user)
 
-      const convertedUser = this.convertUserData(registeredUser)
-
-      delete registeredUser.password
+      delete user.password
 
       const tokens = await this.newRefreshAndAccessToken(user, values)
       const response = {
@@ -67,88 +59,26 @@ export class AuthService {
     }
   }
 
-  async signupAdmin(dto: AuthSignUpAdminDto, values: { userAgent: string; ipAddress: string }) {
+  async signupAdmin(dto: AuthSignUpDto, values: { userAgent: string; ipAddress: string }) {
     // generate password hash
     const hash = await argon.hash(dto.password)
     // save user to db
     try {
-      let role = [dto.role]
-      if (!role) role = ['user']
+      const role = [Role.Admin]
 
       // console.log(role,)
-      const user = await this.prisma.user.create({
+      const user = await this.prisma.users.create({
         data: {
-          email: dto.email,
+          username: dto.username,
           name: dto.name,
           role: role,
           password: hash,
-          ettermek: {
-            create: {
-              name: dto.restaurantName,
-              adoszam: dto.taxNumber,
-              ceg: dto.companyName,
-              city_name: dto.cityName,
-              address: dto.address,
-              lat: Number(dto.lat),
-              lng: Number(dto.lng),
-              aktiv: false,
-              img_path: [],
-              nyitvatartas: [
-                {
-                  open: false,
-                  start: '08:00',
-                  end: '17:00',
-                },
-                {
-                  open: false,
-                  start: '08:00',
-                  end: '17:00',
-                },
-                {
-                  open: false,
-                  start: '08:00',
-                  end: '17:00',
-                },
-                {
-                  open: false,
-                  start: '08:00',
-                  end: '17:00',
-                },
-                {
-                  open: false,
-                  start: '08:00',
-                  end: '17:00',
-                },
-                {
-                  open: false,
-                  start: '08:00',
-                  end: '17:00',
-                },
-                {
-                  open: false,
-                  start: '08:00',
-                  end: '17:00',
-                },
-              ]
-            }
-          }
         }
       })
 
-      await this.prisma.ettermek.update({
-        where: {
-          id: user.etterem_id
-        },
-        data: {
-          created_by_user_id: user.id
-        }
-      })
+      const convertedUser = this.convertUserData(user)
 
-      const registeredUser = await this.sendVerificationEmail(user)
-
-      const convertedUser = this.convertUserData(registeredUser)
-
-      delete registeredUser.password
+      delete user.password
 
       const tokens = await this.newRefreshAndAccessToken(user, values)
       const response = {
@@ -171,7 +101,7 @@ export class AuthService {
 
   async updateSettings(dto: AuthUpdateSettingsDto) {
     try {
-      const updatedUser = await this.prisma.user.update({
+      const updatedUser = await this.prisma.users.update({
         where: {
           id: dto.userId
         },
@@ -202,9 +132,9 @@ export class AuthService {
 
   async signin(dto: AuthSignInDto, values: { userAgent: string; ipAddress: string }) {
     // find the user
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.users.findUnique({
       where: {
-        email: dto.email
+        username: dto.username
       }
     })
     // if user does not exist throw exception
@@ -229,18 +159,14 @@ export class AuthService {
 
   async signinAdmin(dto: AuthSignInDto, values: { userAgent: string; ipAddress: string }) {
     // find the user
-    await this.checkAdminUser(dto)
-    const user = await this.prisma.user.findUnique({
+    // await this.checkAdminUser(dto)
+    const user = await this.prisma.users.findUnique({
       where: {
-        email: dto.email
+        username: dto.username
       }
     })
     // if user does not exist throw exception
     if (!user) throw new NotFoundException('User not found.')
-
-    const roles = JSON.parse(JSON.stringify(user.role))
-
-    if (!user.etterem_id && !roles.includes('owner')) throw new ForbiddenException()
 
     // compare passwords
     const pwMatches = await argon.verify(user.password, dto.password)
@@ -259,100 +185,6 @@ export class AuthService {
     return response
   }
 
-  async loginGoogleUser(email: string, values: { userAgent: string, ipAddress: string }): Promise<{ user: convertedUserDto, access_token: string, refresh_token: string } | undefined> {
-    //   const tokenInfo = await this.oauthClient.getTokenInfo(token)
-    //   const user = await this.prisma.user.findFirst({
-    //     where: {
-    //       email: tokenInfo.email
-    //     }
-    //   })
-    //   if (user) {
-    //     const tokens = await this.newRefreshAndAccessToken(user, values)
-    //     return {
-    //       user: this.convertUserData(user),
-    //       access_token: tokens.accessToken,
-    //       refresh_token: tokens.refreshToken
-    //     }
-    //   } else {
-    //     const newUser = await this.prisma.user.create({
-    //       data: {
-    //         email: tokenInfo.email,
-    //         name: tokenInfo.email.split('@')[0],
-    //         password: await argon.hash(tokenInfo.aud),
-    //         role: ['user']
-    //       }
-    //     })
-    //     const tokens = await this.newRefreshAndAccessToken(newUser, values)
-    //     return {
-    //       user: this.convertUserData(newUser),
-    //       access_token: tokens.accessToken,
-    //       refresh_token: tokens.refreshToken
-    //     }
-    //   }
-    //   return undefined
-    // }
-    const user = await this.prisma.user.findFirst({
-      where: {
-        email: email
-      }
-    })
-    if (user) {
-      const tokens = await this.newRefreshAndAccessToken(user, values)
-      return {
-        user: this.convertUserData(user),
-        access_token: tokens.accessToken,
-        refresh_token: tokens.refreshToken
-      }
-    } else {
-      const newUser = await this.prisma.user.create({
-        data: {
-          email: email,
-          name: email.split('@')[0],
-          password: await argon.hash(objectHash({ email: email })),
-          role: ['user']
-        }
-      })
-      const tokens = await this.newRefreshAndAccessToken(newUser, values)
-      return {
-        user: this.convertUserData(newUser),
-        access_token: tokens.accessToken,
-        refresh_token: tokens.refreshToken
-      }
-    }
-    return undefined
-  }
-
-  async loginFacebookUser(email: string, values: { userAgent: string, ipAddress: string }): Promise<{ user: convertedUserDto, access_token: string, refresh_token: string } | undefined> {
-    const user = await this.prisma.user.findFirst({
-      where: {
-        email: email
-      }
-    })
-    if (user) {
-      const tokens = await this.newRefreshAndAccessToken(user, values)
-      return {
-        user: this.convertUserData(user),
-        access_token: tokens.accessToken,
-        refresh_token: tokens.refreshToken
-      }
-    } else {
-      const newUser = await this.prisma.user.create({
-        data: {
-          email: email,
-          name: email.split('@')[0],
-          password: await argon.hash(objectHash({ email: email })),
-          role: ['user']
-        }
-      })
-      const tokens = await this.newRefreshAndAccessToken(newUser, values)
-      return {
-        user: this.convertUserData(newUser),
-        access_token: tokens.accessToken,
-        refresh_token: tokens.refreshToken
-      }
-    }
-    return undefined
-  }
 
   async logout(refreshStr): Promise<void> {
     const refreshToken = await this.retrieveRefreshToken(refreshStr)
@@ -368,171 +200,8 @@ export class AuthService {
     })
   }
 
-  async verify(code: string) {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        verify: code
-      }
-    })
-    if (!user) throw new NotFoundException()
-
-    await this.prisma.user.update({
-      where: {
-        verify: code
-      },
-      data: {
-        verify: null
-      }
-    })
-
-
-    return { status: 200, message: 'Email verified successfuly' }
-  }
-
-  async forgotPassword(dto: ForgotPasswordDto) {
-    const user = await this.prisma.user.findFirst({
-      where: {
-        email: dto.email
-      }
-    })
-
-    if (!user) throw new NotFoundException('Bad credentials')
-
-    const successful = await this.sendForgotPasswordEmail(user)
-
-    if (!successful) throw new BadRequestException('Something went wrong')
-
-    return { statusCode: 200, message: 'Email sent' }
-  }
-
-  async resetPassword(dto: ResetPasswordDto) {
-    const user = await this.prisma.user.findFirst({
-      where: {
-        forgot: dto.resetToken
-      }
-    })
-
-    if (!user) throw new NotFoundException('User not found')
-    const hash = await argon.hash(dto.password)
-
-    const successful = await this.prisma.user.update({
-      where: {
-        id: user.id
-      },
-      data: {
-        forgot: null,
-        password: hash
-      }
-    })
-
-    if (!successful) throw new BadRequestException('Something went wrong')
-
-    return { status: 200 }
-  }
-
-  // 
-
-  private async sendVerificationEmail(user: user): Promise<user> {
-
-    const verifyCode = objectHash(user)
-
-    const updatedUser = await this.prisma.user.update({
-      where: {
-        id: user.id
-      },
-      data: {
-        verify: verifyCode
-      }
-    })
-
-    this.mailerService
-      .sendMail({
-        to: user.email, // list of receivers
-        // from: 'noreply@nestjs.com', // sender address
-        subject: 'Please verify your email.', // Subject line
-        template: './emailVerification',
-        // attachments: [{
-        //   filename: 'email.png',
-        //   path: join(process.cwd(), `/dist/mail/templates/images/email.png`),
-        //   cid: 'email'
-        // }],
-        context: {
-          // Data to be sent to template engine.
-          name: user.name,
-          email: user.email,
-          image1: join(this.config.get('IMAGES_URL'), 'email.png'),
-          verifyLink: join(this.config.get('DOMAIN_URL'), `auth/verify?code=${verifyCode}`)
-        },
-        // text: 'welcome', // plaintext body
-        // html: '<b>welcome</b>', // HTML body content
-      })
-      .then((msg) => {
-        console.log(msg)
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-    return updatedUser
-  }
-
-  private async sendForgotPasswordEmail(user: user): Promise<user> {
-
-    const verifyCode = objectHash(user)
-
-    const updatedUser = await this.prisma.user.update({
-      where: {
-        id: user.id
-      },
-      data: {
-        forgot: verifyCode,
-        password: ''
-      }
-    })
-
-    this.mailerService
-      .sendMail({
-        to: user.email, // list of receivers
-        // from: 'noreply@nestjs.com', // sender address
-        subject: 'Forgotten Password', // Subject line
-        template: './forgotPassword',
-        // attachments: [{
-        //   filename: 'email.png',
-        //   path: join(process.cwd(), `/dist/mail/templates/images/email.png`),
-        //   cid: 'email'
-        // }],
-        context: {
-          // Data to be sent to template engine.
-          name: user.name,
-          // email: user.email,
-          // image1: join(this.config.get('IMAGES_URL'), 'email.png'),
-          verifyLink: join(this.config.get('DOMAIN_URL'), `reset-password/${verifyCode}`)
-        },
-        // text: 'welcome', // plaintext body
-        // html: '<b>welcome</b>', // HTML body content
-      })
-      .then((msg) => {
-        console.log(msg)
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-    return updatedUser
-  }
-
-  async getValidReset(resetToken: string) {
-    const user = await this.prisma.user.findFirst({
-      where: {
-        forgot: resetToken
-      }
-    })
-
-    if (!user) throw new NotFoundException('Password reset request not found')
-
-    return { status: 200 }
-  }
-
   private async checkAdminUser(dto: AuthSignInDto): Promise<void> {
-    getAdminUser(dto)
+    // getAdminUser(dto)
   }
 
   async refresh(refreshStr: string): Promise<{ user: convertedUserDto, access_token: string } | undefined> {
@@ -542,7 +211,7 @@ export class AuthService {
       return undefined
     }
 
-    const user = await this.prisma.user.findFirst({
+    const user = await this.prisma.users.findFirst({
       where: {
         id: refreshToken.user_id
       }
@@ -585,7 +254,7 @@ export class AuthService {
   // TOKEN FUNCTIONS 
 
   private async newRefreshAndAccessToken(
-    user: user,
+    user: users,
     values: { userAgent: string; ipAddress: string },
     remember = false
   ): Promise<{ accessToken: string; refreshToken: string }> {
@@ -617,15 +286,15 @@ export class AuthService {
     return this.jwt.sign({ ...data }, { secret: this.config.get('REFRESH_SECRET') })
   }
 
-  convertUserData(user: user) {
+  convertUserData(user: users) {
 
     return {
       role: user.role,
       data: {
-        displayName: user.name,
+        displayName: user.name || user.username,
         photoURL: '', //assets/images/avatars/brian-hughes.jpg
-        etterem_id: user.etterem_id,
-        email: user.email,
+        // etterem_id: user.etterem_id,
+        username: user.username,
         shortcuts: []
       }
 

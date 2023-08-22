@@ -1,18 +1,16 @@
 /* eslint-disable indent */
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from "class-validator"
+import { ApiProperty, ApiPropertyOptional, } from "@nestjs/swagger"
+import { IsNotEmpty, IsString } from "class-validator"
 
 export class CreateUserDto {
 
   @ApiProperty()
-  @IsEmail()
-  @IsNotEmpty()
-  email: string
-
-  @ApiProperty()
-  @IsNotEmpty()
   @IsString()
-  role: string
+  @IsNotEmpty()
+  username: string
+
+  @ApiPropertyOptional()
+  role: string | undefined | null
 
   @ApiProperty()
   @IsNotEmpty()
@@ -23,9 +21,4 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsString()
   name: string
-
-  @ApiPropertyOptional()
-  @IsString()
-  @IsOptional()
-  phone: string | null
 }

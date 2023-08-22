@@ -1,26 +1,25 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
-import { user } from '@prisma/client'
+import { users } from '@prisma/client'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import * as argon from 'argon2'
+import { Role } from 'src/auth/enums'
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) { }
 
-  async create(dto: CreateUserDto, _user: user) {
+  async create(dto: CreateUserDto) {
     try {
       const hash = await argon.hash(dto.password)
-      let role = [dto.role]
-      if (!role) role = ['user']
-      const user = await this.prisma.user.create({
+      const role = dto.role != null ? [dto.role] : [Role.User]
+      const user = await this.prisma.users.create({
         data: {
           ...dto,
           role: role,
           password: hash,
-          etterem_id: _user.etterem_id
         }
       })
 
@@ -36,18 +35,17 @@ export class UsersService {
     }
   }
 
-  async findAll(id: number, userId: number) {
+  async findAll(userId: number) {
     try {
-      const users = await this.prisma.user.findMany({
+      const users = await this.prisma.users.findMany({
         where: {
-          etterem_id: id,
           id: {
             not: userId
           }
         },
       })
 
-      if (!users.length) throw new NotFoundException(`Users not found with restaurant id: ${id}`)
+      if (!users.length) throw new NotFoundException(`Users not found`)
 
       const result = users.map(user => {
         delete user.password
@@ -62,7 +60,7 @@ export class UsersService {
 
   async findOne(id: number) {
     try {
-      const user = await this.prisma.user.findFirst({
+      const user = await this.prisma.users.findFirst({
         where: {
           id: id
         }
@@ -78,7 +76,7 @@ export class UsersService {
 
   async update(id: number, updateUserDto: UpdateUserDto) {
     try {
-      const user = await this.prisma.user.update({
+      const user = await this.prisma.users.update({
         where: {
           id: id
         },
@@ -99,7 +97,7 @@ export class UsersService {
   async remove(id: number) {
     try {
 
-      const hasUser = await this.prisma.user.findFirst({
+      const hasUser = await this.prisma.users.findFirst({
         where: {
           id: id
         }
@@ -107,7 +105,7 @@ export class UsersService {
 
       if (!hasUser) throw new NotFoundException(`User not found with id: ${id}`)
 
-      const user = await this.prisma.user.delete({
+      const user = await this.prisma.users.delete({
         where: {
           id: id
         }

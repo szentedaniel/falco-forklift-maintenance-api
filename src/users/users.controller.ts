@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@n
 import { UsersService } from './users.service'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
-import { user } from '@prisma/client'
+import { users } from '@prisma/client'
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { JwtGuard, RolesGuard } from 'src/auth/guard'
 import { Role } from 'src/auth/enums'
@@ -18,17 +18,17 @@ export class UsersController {
   @Roles(Role.Admin)
   @ApiOperation({ summary: `ReqRole: ${[Role.Admin]}` })
   @ApiBearerAuth()
-  create(@Body() createUserDto: CreateUserDto, @GetUser() user: user) {
-    return this.usersService.create(createUserDto, user)
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto)
   }
 
-  @Get('restaurant')
+  @Get()
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(Role.Admin)
   @ApiOperation({ summary: `ReqRole: ${[Role.Admin]}` })
   @ApiBearerAuth()
-  findAll(@GetUser('etterem_id') id: string, @GetUser('id') userId: string) {
-    return this.usersService.findAll(+id, +userId)
+  findAll(@GetUser('id') userId: string) {
+    return this.usersService.findAll(+userId)
   }
 
   @Get(':id')

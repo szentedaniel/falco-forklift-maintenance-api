@@ -8,8 +8,8 @@ export class convertedUserDto {
   data: {
     displayName: string;
     photoURL: string;
-    etterem_id: number;
-    email: string;
+    // etterem_id: number;
+    username: string;
     shortcuts: any[];
   }
 }

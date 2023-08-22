@@ -4,9 +4,9 @@ import { IsBoolean, IsEmail, IsNotEmpty, IsNumber, IsObject, IsOptional, IsStrin
 
 export class AuthSignUpDto {
   @ApiProperty()
-  @IsEmail()
+  @IsString()
   @IsNotEmpty()
-  email: string
+  username: string
 
   @ApiProperty()
   @IsString()
@@ -21,65 +21,6 @@ export class AuthSignUpDto {
   // @ApiPropertyOptional({ enum: ['owner', 'admin', 'staff', 'user'], default: 'user' })
   // @IsOptional()
   // role: string | undefined
-
-  @ApiPropertyOptional()
-  phone: string | undefined
-}
-
-export class AuthSignUpAdminDto {
-  @ApiProperty()
-  @IsEmail()
-  @IsNotEmpty()
-  email: string
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  password: string
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  name: string
-
-  @ApiPropertyOptional({ enum: ['owner', 'admin', 'staff', 'user'], default: 'user' })
-  @IsOptional()
-  role: string | undefined
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  restaurantName: string
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  taxNumber: string
-
-  @ApiPropertyOptional()
-  @IsString()
-  @IsOptional()
-  companyName: string
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  cityName: string
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  address: string
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  lat: number
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  lng: number
 }
 
 export class AuthUpdateSettingsDto {
@@ -104,9 +45,9 @@ const emailExamples = ['admin@developer.com', 'staff@developer.com', 'user@devel
 
 export class AuthSignInDto {
   @ApiProperty({ examples: emailExamples, example: emailExamples[0] })
-  @IsEmail()
+  @IsString()
   @IsNotEmpty()
-  email: string
+  username: string
 
   @ApiProperty({ example: 'developer' })
   @IsString()

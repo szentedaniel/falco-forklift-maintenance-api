@@ -1,12 +1,9 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Ip, Param, Post, Query, Req } from '@nestjs/common'
-import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger'
-import { user } from '@prisma/client'
+import { Body, Controller, Delete, HttpCode, Ip, Post, Req } from '@nestjs/common'
+import { ApiResponse, ApiTags } from '@nestjs/swagger'
 import { AuthService } from './auth.service'
-import { AuthSignInDto, AuthSignUpAdminDto, AuthSignUpDto, ForgotPasswordDto, ResetPasswordDto } from './dto'
-import { emailVerifyDto, defaultAuthResponseDto, ErrorResonseDto, ForgotPasswordSuccessfulResponseDto } from './dto/authRespose.dto'
-import GoogleTokenDto from './dto/google-token.dto'
+import { AuthSignInDto, AuthSignUpDto } from './dto'
+import { defaultAuthResponseDto, ErrorResonseDto } from './dto/authRespose.dto'
 import RefreshTokenDto from './dto/refresh-token.dto'
-import FacebookLoginDto from './dto/facebook-login.dto'
 
 
 @ApiTags('auth')
@@ -42,7 +39,7 @@ export class AuthController {
     status: 403,
     type: ErrorResonseDto
   })
-  signupAdmin(@Req() request, @Ip() ip: string, @Body() dto: AuthSignUpAdminDto) {
+  signupAdmin(@Req() request, @Ip() ip: string, @Body() dto: AuthSignUpDto) {
     return this.authService.signupAdmin(dto, {
       ipAddress: ip,
       userAgent: request.headers['user-agent'],
@@ -96,80 +93,6 @@ export class AuthController {
     })
   }
 
-  @ApiTags('mobile')
-  @Post('/google/login')
-  @HttpCode(200)
-  @ApiResponse({
-    status: 200,
-    type: defaultAuthResponseDto
-  })
-  @ApiResponse({
-    status: 403,
-    type: ErrorResonseDto
-  })
-  @ApiResponse({
-    status: 404,
-    type: ErrorResonseDto
-  })
-  async googleLogin(
-    @Body() body: GoogleTokenDto,
-    @Req() req,
-    @Ip() ip: string,
-  ): Promise<{ user: Partial<user>, access_token: string; refresh_token: string }> {
-    const result = await this.authService.loginGoogleUser(body.email, {
-      userAgent: req.headers['user-agent'],
-      ipAddress: ip,
-    })
-    if (result) {
-      return result
-    } else {
-      throw new HttpException(
-        {
-          status: HttpStatus.UNAUTHORIZED,
-          error: 'Error while logging in with google',
-        },
-        HttpStatus.UNAUTHORIZED,
-      )
-    }
-  }
-
-  @ApiTags('mobile')
-  @Post('/facebook/login')
-  @HttpCode(200)
-  @ApiResponse({
-    status: 200,
-    type: defaultAuthResponseDto
-  })
-  @ApiResponse({
-    status: 403,
-    type: ErrorResonseDto
-  })
-  @ApiResponse({
-    status: 404,
-    type: ErrorResonseDto
-  })
-  async facebookLogin(
-    @Body() body: FacebookLoginDto,
-    @Req() req,
-    @Ip() ip: string,
-  ): Promise<{ user: Partial<user>, access_token: string; refresh_token: string }> {
-    const result = await this.authService.loginFacebookUser(body.email, {
-      userAgent: req.headers['user-agent'],
-      ipAddress: ip,
-    })
-    if (result) {
-      return result
-    } else {
-      throw new HttpException(
-        {
-          status: HttpStatus.UNAUTHORIZED,
-          error: 'Error while logging in with facebook',
-        },
-        HttpStatus.UNAUTHORIZED,
-      )
-    }
-  }
-
   @Post('refresh')
   @HttpCode(200)
   @ApiResponse({
@@ -183,45 +106,5 @@ export class AuthController {
   @Delete('logout')
   async logout(@Body() body: RefreshTokenDto) {
     return this.authService.logout(body.refreshToken)
-  }
-
-  @Get('verify')
-  @HttpCode(200)
-  @ApiQuery({ name: 'code', type: 'string' })
-  @ApiResponse({
-    status: 200,
-    type: emailVerifyDto
-  })
-  @ApiResponse({
-    status: 404,
-    type: ErrorResonseDto
-  })
-  verify(@Query('code') code: string) {
-    return this.authService.verify(code)
-  }
-
-  @ApiTags('mobile')
-  @Post('forgot-password')
-  @HttpCode(200)
-  @ApiResponse({
-    status: 200,
-    type: ForgotPasswordSuccessfulResponseDto
-  })
-  @ApiResponse({
-    status: 400,
-    type: ErrorResonseDto
-  })
-  forgotPassword(@Body() dto: ForgotPasswordDto) {
-    return this.authService.forgotPassword(dto)
-  }
-
-  @Post('reset-password')
-  resetPassword(@Body() dto: ResetPasswordDto) {
-    return this.authService.resetPassword(dto)
-  }
-
-  @Get('reset-password/:resetToken')
-  getValidReset(@Param('resetToken') resetToken: string) {
-    return this.authService.getValidReset(resetToken)
   }
 }
