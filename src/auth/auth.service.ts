@@ -2,7 +2,6 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { PrismaService } from 'src/prisma/prisma.service'
 import { AuthSignInDto, AuthSignUpDto, AuthUpdateSettingsDto } from './dto'
 import * as argon from 'argon2'
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime'
 import { MailerService } from '@nestjs-modules/mailer'
 import { refresh_tokens, users } from '@prisma/client'
 import { ConfigService } from '@nestjs/config'
@@ -10,6 +9,7 @@ import { JwtService } from '@nestjs/jwt'
 import { Auth } from 'googleapis'
 import { convertedUserDto } from './dto/authRespose.dto'
 import { Role } from './enums'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 
 @Injectable()
 export class AuthService {

@@ -1,5 +1,5 @@
 # compiled output
-/client
+# /client
 /dist
 /node_modules
 
@@ -38,3 +38,5 @@ lerna-debug.log*
 
 # rars
 *.rar
+# Local Netlify folder
+.netlify
