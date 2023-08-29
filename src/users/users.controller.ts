@@ -11,12 +11,14 @@ import { GetUser, Roles } from 'src/auth/decorator'
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
   @Post()
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(Role.Admin)
-  @ApiOperation({ summary: `ReqRole: ${[Role.Admin]}` })
+  @ApiOperation({
+    summary: `ReqRole: ${[Role.Admin]}`,
+  })
   @ApiBearerAuth()
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto)
@@ -25,7 +27,9 @@ export class UsersController {
   @Get()
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(Role.Admin)
-  @ApiOperation({ summary: `ReqRole: ${[Role.Admin]}` })
+  @ApiOperation({
+    summary: `ReqRole: ${[Role.Admin]}`,
+  })
   @ApiBearerAuth()
   findAll(@GetUser('id') userId: string) {
     return this.usersService.findAll(+userId)
@@ -34,7 +38,9 @@ export class UsersController {
   @Get(':id')
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(Role.Admin)
-  @ApiOperation({ summary: `ReqRole: ${[Role.Admin]}` })
+  @ApiOperation({
+    summary: `ReqRole: ${[Role.Admin]}`,
+  })
   @ApiBearerAuth()
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id)
@@ -43,7 +49,9 @@ export class UsersController {
   @Patch(':id')
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(Role.Admin)
-  @ApiOperation({ summary: `ReqRole: ${[Role.Admin]}` })
+  @ApiOperation({
+    summary: `ReqRole: ${[Role.Admin]}`,
+  })
   @ApiBearerAuth()
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto)
@@ -52,7 +60,9 @@ export class UsersController {
   @Delete(':id')
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(Role.Admin)
-  @ApiOperation({ summary: `ReqRole: ${[Role.Admin]}` })
+  @ApiOperation({
+    summary: `ReqRole: ${[Role.Admin]}`,
+  })
   @ApiBearerAuth()
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id)

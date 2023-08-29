@@ -8,13 +8,13 @@ import { FileuploadModule } from './fileupload/fileupload.module'
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
 import { UsersModule } from './users/users.module'
+import { ForkliftsModule } from './forklifts/forklifts.module'
 
 @Module({
   imports: [
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'client'),
       exclude: ['/api*/*/*/*/*/*/*', '/api', 'api/auth/verify', '/api/', '/api/*', '/api*'],
-
     }),
     ConfigModule.forRoot({ isGlobal: true }),
     MulterModule.register({ dest: './uploads' }),
@@ -23,6 +23,7 @@ import { UsersModule } from './users/users.module'
     FileuploadModule,
     // MailModule,
     UsersModule,
+    ForkliftsModule,
     // RestaurantsModule,
     // FavoritesModule,
     // TablesModule,
@@ -35,6 +36,6 @@ import { UsersModule } from './users/users.module'
     // StatusModule
   ],
   controllers: [],
-  providers: [AppService,],
+  providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

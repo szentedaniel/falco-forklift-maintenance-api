@@ -19,9 +19,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "db_init": "ts-node ./jobs/db_init.ts",
-    "db_demo": "ts-node ./jobs/db_demo.ts",
-    "db_seed": "ts-node ./prisma/seed.ts"
+    "create_admin": "ts-node ./jobs/create_admin.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

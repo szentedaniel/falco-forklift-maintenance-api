@@ -12,12 +12,14 @@ import { FileuploadService } from './fileupload.service'
 @ApiTags('files')
 @Controller('files')
 export class FileuploadController {
-  constructor(private readonly fileuploadService: FileuploadService) { }
+  constructor(private readonly fileuploadService: FileuploadService) {}
 
   @Post('upload')
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(Role.User, Role.Admin)
-  @ApiOperation({ summary: `ReqRole: ${[Role.User, Role.Admin]}` })
+  @ApiOperation({
+    summary: `ReqRole: ${[Role.User, Role.Admin]}`,
+  })
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -31,26 +33,28 @@ export class FileuploadController {
       },
     },
   })
-  @UseInterceptors(FileInterceptor('image', {
-    storage: diskStorage({
-      destination: './uploads',
-      filename: (req, file, callback) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, callback) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
 
-        const ext = extname(file.originalname)
-        const filenameWithoutExt = file.originalname.slice(0, file.originalname.indexOf(ext))
-        const filename = `${filenameWithoutExt}-${uniqueSuffix}${ext}`
+          const ext = extname(file.originalname)
+          const filenameWithoutExt = file.originalname.slice(0, file.originalname.indexOf(ext))
+          const filename = `${filenameWithoutExt}-${uniqueSuffix}${ext}`
 
-        callback(null, filename)
+          callback(null, filename)
+        },
+      }),
+      fileFilter: (req, file, callback) => {
+        if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+          return callback(new ForbiddenException('Only image files are allowed!'), false)
+        }
+        callback(null, true)
       },
-    }),
-    fileFilter: (req, file, callback) => {
-      if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-        return callback(new ForbiddenException('Only image files are allowed!'), false)
-      }
-      callback(null, true)
-    },
-  }))
+    })
+  )
   async uploadFile(@UploadedFile() file: Express.Multer.File, @GetUser() user) {
     // console.log('upload from user: ', user)
 
@@ -60,7 +64,9 @@ export class FileuploadController {
   @Post('product')
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(Role.User, Role.Admin)
-  @ApiOperation({ summary: `ReqRole: ${[Role.User, Role.Admin]}` })
+  @ApiOperation({
+    summary: `ReqRole: ${[Role.User, Role.Admin]}`,
+  })
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -74,26 +80,28 @@ export class FileuploadController {
       },
     },
   })
-  @UseInterceptors(FileInterceptor('image', {
-    storage: diskStorage({
-      destination: './uploads/products',
-      filename: (req, file, callback) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './uploads/products',
+        filename: (req, file, callback) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
 
-        const ext = extname(file.originalname)
-        const filenameWithoutExt = file.originalname.slice(0, file.originalname.indexOf(ext))
-        const filename = `${filenameWithoutExt}-${uniqueSuffix}${ext}`
+          const ext = extname(file.originalname)
+          const filenameWithoutExt = file.originalname.slice(0, file.originalname.indexOf(ext))
+          const filename = `${filenameWithoutExt}-${uniqueSuffix}${ext}`
 
-        callback(null, filename)
+          callback(null, filename)
+        },
+      }),
+      fileFilter: (req, file, callback) => {
+        if (!file.originalname.match(/\.(jpg|jpeg|png|JPG|JPEG|PNG)$/)) {
+          return callback(new ForbiddenException('Only image files are allowed!'), false)
+        }
+        callback(null, true)
       },
-    }),
-    fileFilter: (req, file, callback) => {
-      if (!file.originalname.match(/\.(jpg|jpeg|png|JPG|JPEG|PNG)$/)) {
-        return callback(new ForbiddenException('Only image files are allowed!'), false)
-      }
-      callback(null, true)
-    },
-  }))
+    })
+  )
   async uploadProductFile(@UploadedFile() file: Express.Multer.File, @GetUser() user) {
     // console.log('upload from user: ', user)
 
@@ -103,7 +111,9 @@ export class FileuploadController {
   @Post('restaurant')
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(Role.User, Role.Admin)
-  @ApiOperation({ summary: `ReqRole: ${[Role.User, Role.Admin]}` })
+  @ApiOperation({
+    summary: `ReqRole: ${[Role.User, Role.Admin]}`,
+  })
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -117,26 +127,28 @@ export class FileuploadController {
       },
     },
   })
-  @UseInterceptors(FileInterceptor('image', {
-    storage: diskStorage({
-      destination: './uploads/restaurants',
-      filename: (req, file, callback) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './uploads/restaurants',
+        filename: (req, file, callback) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
 
-        const ext = extname(file.originalname)
-        const filenameWithoutExt = file.originalname.slice(0, file.originalname.indexOf(ext))
-        const filename = `${filenameWithoutExt}-${uniqueSuffix}${ext}`
+          const ext = extname(file.originalname)
+          const filenameWithoutExt = file.originalname.slice(0, file.originalname.indexOf(ext))
+          const filename = `${filenameWithoutExt}-${uniqueSuffix}${ext}`
 
-        callback(null, filename)
+          callback(null, filename)
+        },
+      }),
+      fileFilter: (req, file, callback) => {
+        if (!file.originalname.match(/\.(jpg|jpeg|png|JPG|JPEG|PNG)$/)) {
+          return callback(new ForbiddenException('Only image files are allowed!'), false)
+        }
+        callback(null, true)
       },
-    }),
-    fileFilter: (req, file, callback) => {
-      if (!file.originalname.match(/\.(jpg|jpeg|png|JPG|JPEG|PNG)$/)) {
-        return callback(new ForbiddenException('Only image files are allowed!'), false)
-      }
-      callback(null, true)
-    },
-  }))
+    })
+  )
   async uploadRestaurantFile(@UploadedFile() file: Express.Multer.File, @GetUser() user) {
     // console.log('upload from user: ', user)
 
@@ -147,12 +159,11 @@ export class FileuploadController {
   @ApiParam({
     name: 'filename',
     description: 'Name of the image (*on the server*)',
-    example: 'email.png'
+    example: 'email.png',
   })
   getFile(@Res() res: Response, @Param('filename') filename) {
     return this.fileuploadService.getImage(res, filename)
   }
-
 
   @Get('products/:filename')
   @ApiParam({
@@ -171,5 +182,4 @@ export class FileuploadController {
   getPlaceholder(@Res() res: Response, @Param('filename') filename) {
     return this.fileuploadService.getPlaceholder(res, filename)
   }
-
 }

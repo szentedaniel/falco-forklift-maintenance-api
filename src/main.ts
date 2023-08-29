@@ -12,9 +12,11 @@ async function bootstrap() {
   app.enableCors()
 
   // Validation pipe API dto-hoz
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: false
-  }))
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: false,
+    })
+  )
 
   app.setGlobalPrefix('/api')
 

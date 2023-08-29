@@ -9,7 +9,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateUserDto) {
     try {
@@ -20,7 +20,7 @@ export class UsersService {
           ...dto,
           role: role,
           password: hash,
-        }
+        },
       })
 
       delete user.password
@@ -40,14 +40,14 @@ export class UsersService {
       const users = await this.prisma.users.findMany({
         where: {
           id: {
-            not: userId
-          }
+            not: userId,
+          },
         },
       })
 
       if (!users.length) throw new NotFoundException(`Users not found`)
 
-      const result = users.map(user => {
+      const result = users.map((user) => {
         delete user.password
         return user
       })
@@ -62,8 +62,8 @@ export class UsersService {
     try {
       const user = await this.prisma.users.findFirst({
         where: {
-          id: id
-        }
+          id: id,
+        },
       })
       if (!user) throw new NotFoundException(`User not found with id: ${id}`)
 
@@ -78,11 +78,11 @@ export class UsersService {
     try {
       const user = await this.prisma.users.update({
         where: {
-          id: id
+          id: id,
         },
         data: {
-          ...updateUserDto
-        }
+          ...updateUserDto,
+        },
       })
 
       if (!user) throw new NotFoundException(`User not found with id: ${id}`)
@@ -96,21 +96,19 @@ export class UsersService {
 
   async remove(id: number) {
     try {
-
       const hasUser = await this.prisma.users.findFirst({
         where: {
-          id: id
-        }
+          id: id,
+        },
       })
 
       if (!hasUser) throw new NotFoundException(`User not found with id: ${id}`)
 
       const user = await this.prisma.users.delete({
         where: {
-          id: id
-        }
+          id: id,
+        },
       })
-
 
       delete user.password
       return user

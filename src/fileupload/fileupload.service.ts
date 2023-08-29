@@ -25,17 +25,16 @@ export class FileuploadService {
     try {
       this.logger.log(`File uploaded successfully: ${await file.filename} (${this.formatBytes(file.size)})`)
       return {
-        'success': true,
-        'data': file
+        success: true,
+        data: file,
       }
-
     } catch (err) {
       console.log(err)
 
       this.logger.error('An error occurred while uploading an image')
       return {
-        'success': false,
-        'data': err
+        success: false,
+        data: err,
       }
     }
   }
@@ -45,8 +44,7 @@ export class FileuploadService {
     // console.log(files)
     // console.log(files.includes(filename))
 
-    if (files.includes(filename))
-      return of(res.sendFile(join(process.cwd(), `./uploads/${filename}`)))
+    if (files.includes(filename)) return of(res.sendFile(join(process.cwd(), `./uploads/${filename}`)))
     throw new NotFoundException('Image not found.')
   }
 
@@ -54,8 +52,7 @@ export class FileuploadService {
     const path = `./images/allergies`
 
     const files = readdirSync(path)
-    if (files.includes(filename))
-      return of(res.sendFile(join(process.cwd(), `${path}/${filename}`)))
+    if (files.includes(filename)) return of(res.sendFile(join(process.cwd(), `${path}/${filename}`)))
     throw new NotFoundException('Image not found.')
   }
 
@@ -64,8 +61,7 @@ export class FileuploadService {
     // console.log(files)
     // console.log(files.includes(filename))
 
-    if (files.includes(filename))
-      return of(res.sendFile(join(process.cwd(), `./uploads/products/${filename}`)))
+    if (files.includes(filename)) return of(res.sendFile(join(process.cwd(), `./uploads/products/${filename}`)))
     throw new NotFoundException('Image not found.')
   }
 
@@ -73,9 +69,7 @@ export class FileuploadService {
     const path = `./images/placeholders`
 
     const files = readdirSync(path)
-    if (files.includes(filename))
-      return of(res.sendFile(join(process.cwd(), `${path}/${filename}`)))
+    if (files.includes(filename)) return of(res.sendFile(join(process.cwd(), `${path}/${filename}`)))
     throw new NotFoundException('Image not found.')
   }
-
 }

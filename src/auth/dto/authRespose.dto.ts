@@ -1,16 +1,15 @@
 /* eslint-disable indent */
-import { ApiResponseProperty } from "@nestjs/swagger"
-import { Prisma } from "@prisma/client"
+import { ApiResponseProperty } from '@nestjs/swagger'
+import { Prisma } from '@prisma/client'
 
 export class convertedUserDto {
-
   role: Prisma.JsonValue
   data: {
-    displayName: string;
-    photoURL: string;
+    displayName: string
+    photoURL: string
     // etterem_id: number;
-    username: string;
-    shortcuts: any[];
+    username: string
+    shortcuts: any[]
   }
 }
 
