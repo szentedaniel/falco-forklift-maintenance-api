@@ -9,18 +9,18 @@ datasource db {
 }
 
 model forklifts {
-  id           Int            @id @default(autoincrement())
+  id           Int            @id @unique(map: "forklifts_id_uindex") @default(autoincrement())
   name         String         @unique(map: "forklifts_name_uindex") @db.VarChar(100)
   active       Boolean        @default(dbgenerated("(true)"))
   maintenances maintenances[]
 }
 
 model maintenances {
-  id          Int       @id @default(autoincrement())
+  id          Int       @id @unique(map: "maintenances_id_uindex") @default(autoincrement())
   created_at  DateTime  @default(dbgenerated("(now())")) @db.Timestamp(0)
   forklift_id Int
   user_id     Int
-  images      Json      @default(dbgenerated("(_utf8mb4\\'[]\\')"))
+  images      Json
   has_damage  Boolean   @default(dbgenerated("(false)"))
   description String?   @db.Text
   forklifts   forklifts @relation(fields: [forklift_id], references: [id], onDelete: Cascade, map: "fk_maintenances_forklifts")
@@ -45,6 +45,8 @@ model settings {
   settings  Json?
   shortcuts Json?
   users     users @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_settings_users")
+
+  @@index([user_id])
 }
 
 model users {

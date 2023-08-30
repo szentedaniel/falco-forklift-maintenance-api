@@ -1,12 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, UseGuards } from '@nestjs/common'
 import { ForkliftsService } from './forklifts.service'
 import { CreateForkliftDto } from './dto/create-forklift.dto'
 import { UpdateForkliftDto } from './dto/update-forklift.dto'
 import { JwtGuard, RolesGuard } from 'src/auth/guard'
 import { Role } from 'src/auth/enums'
 import { Roles } from 'src/auth/decorator'
-import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger'
 
+@ApiTags('forklifts')
 @Controller('forklifts')
 export class ForkliftsController {
   constructor(private readonly forkliftsService: ForkliftsService) { }
