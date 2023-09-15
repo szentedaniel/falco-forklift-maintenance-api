@@ -9,6 +9,7 @@ import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
 import { UsersModule } from './users/users.module'
 import { ForkliftsModule } from './forklifts/forklifts.module'
+import { MaintenancesModule } from './maintenances/maintenances.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ForkliftsModule } from './forklifts/forklifts.module'
     // MailModule,
     UsersModule,
     ForkliftsModule,
+    MaintenancesModule,
     // RestaurantsModule,
     // FavoritesModule,
     // TablesModule,

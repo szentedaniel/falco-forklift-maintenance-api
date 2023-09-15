@@ -40,7 +40,7 @@ export class AuthUpdateSettingsDto {
   shortcuts: object
 }
 
-const emailExamples = ['admin@developer.com', 'staff@developer.com', 'user@developer.com']
+const emailExamples = ['admin', 'user']
 
 export class AuthSignInDto {
   @ApiProperty({
