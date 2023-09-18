@@ -29,9 +29,13 @@ export class MaintenancesService {
           description: createMaintenanceDto.description
         },
         include: {
-          forklifts: true
+          forklifts: true,
+          users: true
         }
       })
+
+      delete maintenance.users.password
+
       return maintenance
     } catch (error) {
       throw error
@@ -43,13 +47,22 @@ export class MaintenancesService {
       const maintenance = await this.prisma.maintenances.findMany({
         where: { forklift_id: forkliftId },
         include: {
-          forklifts: true
+          forklifts: true,
+          users: true
+        },
+        orderBy: {
+          created_at: 'desc'
         }
       })
 
       if (!maintenance.length) throw new NotFoundException(`Nem találhatók karbantartások`)
 
-      return maintenance
+      const censoredMaintenance = maintenance.map(m => {
+        const temp = m
+        delete m.users.password
+        return temp
+      })
+      return censoredMaintenance
     } catch (error) {
       throw error
     }
@@ -57,14 +70,17 @@ export class MaintenancesService {
 
   async findOne(id: number) {
     try {
-      const maintenance = await this.prisma.maintenances.findMany({
+      const maintenance = await this.prisma.maintenances.findFirst({
         where: { id: id },
         include: {
-          forklifts: true
+          forklifts: true,
+          users: true
         }
       })
 
-      if (!maintenance.length) throw new NotFoundException(`Nem találhatók karbantartások`)
+      if (!maintenance) throw new NotFoundException(`Nem találhatók karbantartások`)
+
+      delete maintenance.users.password
 
       return maintenance
     } catch (error) {
@@ -85,11 +101,14 @@ export class MaintenancesService {
           ...updateMaintenanceDto,
         },
         include: {
-          forklifts: true
+          forklifts: true,
+          users: true
         }
       })
 
       if (!maintenance) throw new NotFoundException(`Nem található karbantartás ezzel az ID-vel: ${id}`)
+
+      delete maintenance.users.password
 
       return maintenance
     } catch (error) {
