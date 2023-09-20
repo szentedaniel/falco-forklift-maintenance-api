@@ -9,12 +9,12 @@ import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
 import { UsersModule } from './users/users.module'
 import { ForkliftsModule } from './forklifts/forklifts.module'
-import { MaintenancesModule } from './maintenances/maintenances.module';
+import { MaintenancesModule } from './maintenances/maintenances.module'
 
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'client'),
+      rootPath: join(__dirname, '..', '..', 'client'),
       exclude: ['/api*/*/*/*/*/*/*', '/api', 'api/auth/verify', '/api/', '/api/*', '/api*'],
     }),
     ConfigModule.forRoot({ isGlobal: true }),
@@ -40,4 +40,4 @@ import { MaintenancesModule } from './maintenances/maintenances.module';
   controllers: [],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
