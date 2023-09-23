@@ -12,7 +12,7 @@ import { FileuploadService } from './fileupload.service'
 @ApiTags('files')
 @Controller('files')
 export class FileuploadController {
-  constructor(private readonly fileuploadService: FileuploadService) {}
+  constructor(private readonly fileuploadService: FileuploadService) { }
 
   @Post('upload')
   @UseGuards(JwtGuard, RolesGuard)
@@ -61,7 +61,7 @@ export class FileuploadController {
     return await this.fileuploadService.uploadImage(file)
   }
 
-  @Post('product')
+  @Post('report')
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(Role.User, Role.Admin)
   @ApiOperation({
@@ -83,7 +83,7 @@ export class FileuploadController {
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
-        destination: './uploads/products',
+        destination: './uploads/report_images',
         filename: (req, file, callback) => {
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
 
@@ -165,7 +165,7 @@ export class FileuploadController {
     return this.fileuploadService.getImage(res, filename)
   }
 
-  @Get('products/:filename')
+  @Get('reports/:filename')
   @ApiParam({
     name: 'filename',
     description: 'Name of the image of the product (*on the server*)',
