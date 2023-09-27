@@ -1,0 +1,33 @@
+Szükséges programok:
+- Nodejs
+- npm
+- yarn
+
+
+Frontend és backend mappában is kell lennie .env fájlnak. Ez tárolja a környezeti változókat.
+
+Környezeti változók (frontend):
+REACT_APP_DOMAIN=https://forklift.falco.com/     # -publikus cím, ahol elérni a backendet
+REACT_APP_API=${REACT_APP_DOMAIN}api/     # -itt érni el az API-t
+
+Környezeti változók (backend):
+DATABASE_URL='mysql://username:password@host/db_name?sslaccept=strict'     # -adatbázis elérési útja
+PORT=3000     # -Port amin fusson a szerver
+DOMAIN_URL=https://forklift.falco.com:${PORT}/     #-publikus cím, ahol elérni a backendet
+API_URL=${DOMAIN_URL}api     # -itt érni el az API-t
+IMAGES_URL=${DOMAIN_URL}/files/image     # -képek elérési útja
+JWT_SECRET=DA31BADC4CBA83B6     # -authentikációval kapcsolatos hash. Ha nem értesz hozzá, ne nyúlj hozzá!!!
+REFRESH_SECRET=4BC384776747AA6CFD5CCB86673AB     # -authentikációval kapcsolatos hash. Ha nem értesz hozzá, ne nyúlj hozzá!!!
+
+Konfigurálás menete:
+1. kliens mappában 'npm install' parancs kiadása
+2. kliens .env elkészítése
+3. backend mappában 'yarn' parancs kiadása
+4. backend mappában .env elkészítése
+5. backend mappában 'npx prisma db push' parancs kiadása
+6. HA WINDOWS: backend mappában build-client.bat futtatása.
+7. HA LINUX: kliens mappában 'npm run build', majd a legenerált client mappát átmásolni backend mappába
+8. backend mappában 'yarn run build' parancs kiadása
+9. backend mappában 'yarn start' parancs kiadása
+
+Ezek után a szerverünk a .env fájlban meghatározott porton fut.
