@@ -31,3 +31,11 @@ Konfigurálás menete:
 9. backend mappában 'yarn start' parancs kiadása
 
 Ezek után a szerverünk a .env fájlban meghatározott porton fut.
+
+Admin user hozzáadása:
+parancs: yarn create_admin
+
+használat:
+yarn create_admin "név" "felhasználónév" "jelszó" "jelszó újra"
+vagy
+yarn create_admin
